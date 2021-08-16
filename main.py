@@ -71,42 +71,34 @@ def main_menu():
 
     background = pygame.image.load('source/menu/background.jpg')
     light_background = pygame.image.load('source/menu/light_background.jpg')
-    display.blit(background, (dif_x, dif_y))
+    display.blit(background, (0, 0))
     positions = [
-        (103 + dif_x, 321 + dif_y),
-        (424 + dif_x, 118 + dif_y),
-        (486 + dif_x, 321 + dif_y),
+        (103, 321),
+        (424, 118),
+        (486, 321),
     ]
     pos = randint(0, 2)
     purple_ninja = GameCharacter(positions[pos], "purple_ninja")
     green_ninja = GameCharacter(positions[pos - 1], "green_ninja")
     del pos, screen_width, screen_height
     ############################################################################
-    ############################################################################
     button_start_image = pygame.image.load('source/menu/startbtn.png')
-    button_start = pygame.Rect(247 + dif_x, 100 + dif_y, button_start_image.get_width(),
-                               button_start_image.get_height())
+    button_start = pygame.Rect(247, 100, button_start_image.get_width(), button_start_image.get_height())
     button_load_image = pygame.image.load('source/menu/loadbtn.png')
-    button_load = pygame.Rect(382 + dif_x, 177 + dif_y, button_load_image.get_width(), button_load_image.get_height())
+    button_load = pygame.Rect(382, 177, button_load_image.get_width(), button_load_image.get_height())
     button_settings_image = pygame.image.load('source/menu/settingsbtn.png')
-    button_settings = pygame.Rect(113 + dif_x, 228 + dif_y, button_settings_image.get_width(),
-                                  button_settings_image.get_height())
+    button_settings = pygame.Rect(113, 228, button_settings_image.get_width(), button_settings_image.get_height())
     button_exit_image = pygame.image.load('source/menu/exitbtn.png')
-    button_exit = pygame.Rect(256 + dif_x, 338 + dif_y, button_exit_image.get_width(), button_exit_image.get_height())
+    button_exit = pygame.Rect(256, 338, button_exit_image.get_width(), button_exit_image.get_height())
     chain_image = pygame.image.load('source/menu/chain.png')
-    chain = pygame.Rect(343 + dif_x, 136 + dif_y, chain_image.get_width(), chain_image.get_height())
+    chain = pygame.Rect(343, 136, chain_image.get_width(), chain_image.get_height())
     chain_down_image = pygame.image.load('source/menu/chaindown.png')
-    chain_down = pygame.Rect(333 + dif_x, 137 + dif_y, chain_down_image.get_width(), chain_down_image.get_height())
+    chain_down = pygame.Rect(333, 137, chain_down_image.get_width(), chain_down_image.get_height())
     images = [button_start_image, button_load_image, button_settings_image, button_exit_image, chain_image,
               chain_down_image, purple_ninja.sprite, green_ninja.sprite]
     objects = [button_start, button_load, button_settings, button_exit, chain, chain_down, purple_ninja, green_ninja]
     for image, obj in zip(images, objects):
         display.blit(image, obj)
-    for i in range(401):
-        if i % 10 == 0:
-            display.fill((225, 225, 225), ((100, i), (1, 1)))
-        if i % 100 == 0:
-            display.fill((225, 0, 0), ((100, i), (1, 1)))
     pygame.display.update()
     clock.tick(60)
     running = True
@@ -118,7 +110,7 @@ def main_menu():
                 if event.key == pygame.K_ESCAPE:
                     running = False
         surf = pygame.transform.scale(display, win_size)
-        screen.blit(surf, (0, 0))
+        screen.blit(surf, (dif_x, dif_y))
         pygame.display.update()
         clock.tick(60)
 
