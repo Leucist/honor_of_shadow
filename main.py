@@ -121,6 +121,20 @@ def main_menu():
     running = True
     while running:
         display.blit(background, (0, 0))
+
+        light = []
+        # Probably gonna remake it in order it will be easier to treat torches as single objects
+        purple_torch = [purple_ninja.rect.x + 3, purple_ninja.rect.y + 12]
+        green_torch = [green_ninja.rect.x + 3, green_ninja.rect.y + 12]
+        LIGHT_DISTANCE = 100
+        for i in range(LIGHT_DISTANCE):
+            light.append(pygame.Rect(purple_torch[0] - LIGHT_DISTANCE / 2 - i, purple_torch[1] - LIGHT_DISTANCE / 2 + i,
+                                     LIGHT_DISTANCE + i, 1))
+            light.append(pygame.Rect(green_torch[0] - LIGHT_DISTANCE / 2 - i, green_torch[1] - LIGHT_DISTANCE / 2 + i,
+                                     LIGHT_DISTANCE + i, 1))
+        for rect in light:
+            display.blit(light_background, rect, rect)
+
         for image, obj in zip(images, objects):
             display.blit(image, obj)
         if moving != 0:
@@ -134,19 +148,6 @@ def main_menu():
 
         display.blit(purple_ninja.sprite, purple_ninja.rect)
         display.blit(green_ninja.sprite, green_ninja.rect)
-
-        # light = []
-        # # Probably gonna remake it in order it will be easier to treat torches as single objects
-        # purple_torch = [purple_ninja.rect.x + 3, purple_ninja.rect.y + 12]
-        # green_torch = [green_ninja.rect.x + 3, green_ninja.rect.y + 12]
-        # LIGHT_DISTANCE = 100
-        # for i in range(LIGHT_DISTANCE):
-        #     light.append(pygame.Rect(purple_torch[0] - LIGHT_DISTANCE / 2 - i, purple_torch[1] - LIGHT_DISTANCE / 2 + i,
-        #                              LIGHT_DISTANCE + i, 1))
-        #     # light.append(pygame.Rect(green_torch[0] - LIGHT_DISTANCE / 2 - i, green_torch[1] - LIGHT_DISTANCE / 2 + i,
-        #     #                          LIGHT_DISTANCE + i, 1))
-        # for rect in light:
-        #     display.blit(light_background, rect)
 
         for event in pygame.event.get():
             if event.type == QUIT:
