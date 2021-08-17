@@ -1,5 +1,6 @@
 import pygame
 import sys
+import json
 from random import randint
 from pygame.locals import *
 
@@ -17,35 +18,18 @@ screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
 class GameCharacter:
     def __init__(self, coords, ch_type):
-        if ch_type == "ninja":
-            self.sprite = pygame.image.load('source/MC_r_r.png').convert()
-            self.katana = Armour(10, .6)
-            self.knife = Armour(20, None)
-        elif ch_type == "purple_ninja":
-            self.sprite = pygame.image.load('source/menu/purple_ninja.png')
-        elif ch_type == "green_ninja":
-            self.sprite = pygame.image.load('source/menu/green_ninja.png')
-        elif ch_type == "skeleton_knife":
-            self.sprite = pygame.image.load('source/...').convert()
-        elif ch_type == "skeleton_spear":
-            self.sprite = pygame.image.load('source/...').convert()
+        self.name = ch_type
+        self.sprite = pygame.image.load('source/animations/' + self.name + '/idle/idle_0.png')
+        with open("character_settings.json", "r", encoding="UTF-8") as settings_file:
+            data = json.loads(settings_file.read())
+            self.hp = data[self.name][0]
+            self.weapon_damage = data[self.name][1]
+            self.weapon_cd = data[self.name][2]
+            self.speed = data[self.name][3]  # [walk speed, run speed]
         self.rect = pygame.Rect(coords[0], coords[1], self.sprite.get_width(), self.sprite.get_height())
-        self.speed = [1, 4]     # [walk speed, run speed]
-
-    def set_speed(self, speed):
-        self.speed = speed
 
     def move(self, direction, mode=0):
         self.rect.x += direction * self.speed[mode]
-
-
-class Armour:
-    def __init__(self, damage, cd):
-        self.damage = damage
-        self.cd = cd
-
-    def hit(self):
-        pass
 
 
 def start():
@@ -106,7 +90,8 @@ def main_menu():
             display.blit(image, obj)
         display.blit(purple_ninja.sprite, purple_ninja.rect)
         display.blit(green_ninja.sprite, green_ninja.rect)
-        green_ninja.move(moving)
+        if moving != 0:
+            green_ninja.move(moving)
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
