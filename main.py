@@ -14,13 +14,13 @@ clock = pygame.time.Clock()
 # window_width, window_height = screen_width - 10, screen_height - 50
 # window = pygame.display.set_mode((window_width,window_height))
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-global anim_frame
 
 
 class GameCharacter:
     def __init__(self, coords, ch_type):
         self.animation_database = {}
         self.animation_frames = {}
+        self.anim_frame = 0
         self.name = ch_type
         self.sprite = pygame.image.load('source/animations/' + self.name + '/idle/idle_0.png').convert_alpha()
         with open("character_settings.json", "r", encoding="UTF-8") as settings_file:
@@ -52,10 +52,9 @@ class GameCharacter:
         self.animation_database[mode] = animation_frame_data
 
     def change_frame(self, mode):
-        global anim_frame
-        if anim_frame >= len(self.animation_database[mode]):
-            anim_frame = 0
-        self.sprite = self.animation_frames[self.animation_database[mode][anim_frame]]
+        if self.anim_frame >= len(self.animation_database[mode]):
+            self.anim_frame = 0
+        self.sprite = self.animation_frames[self.animation_database[mode][self.anim_frame]]
 
 
 def change_mode(mode, new_mode):
@@ -73,7 +72,6 @@ def start():
 
 
 def main_menu():
-    global anim_frame
     info = pygame.display.Info()
     screen_width, screen_height = info.current_w, info.current_h
     width = int(((screen_width + screen_height) / 2 + abs(screen_width - screen_height) / 2))
@@ -116,7 +114,9 @@ def main_menu():
     images = [button_start_image, button_load_image, button_settings_image, button_exit_image, chain_image,
               chain_down_image]
     objects = [button_start, button_load, button_settings, button_exit, chain, chain_down]
-    moving, anim_frame = 0, 0
+    moving = 0
+    green_ninja.anim_frame = 0
+    purple_ninja.anim_frame = 0
     mode = 'idle'
     running = True
     while running:
@@ -128,7 +128,9 @@ def main_menu():
             # green_ninja.change_frame('walk')
             green_ninja.move(moving)
         green_ninja.change_frame(mode)
-        anim_frame += 1
+        purple_ninja.change_frame('idle')
+        green_ninja.anim_frame += 1
+        purple_ninja.anim_frame += 1
 
         display.blit(purple_ninja.sprite, purple_ninja.rect)
         display.blit(green_ninja.sprite, green_ninja.rect)
@@ -154,20 +156,20 @@ def main_menu():
                     running = False
                 if event.key == K_RIGHT:
                     moving = 1
-                    anim_frame = 0
+                    green_ninja.anim_frame = 0
                     mode = 'walk'
                 if event.key == K_LEFT:
                     moving = -1
-                    anim_frame = 0
+                    green_ninja.anim_frame = 0
                     mode = 'walk'
             if event.type == KEYUP:
                 if event.key == K_RIGHT:
                     moving = 0
-                    anim_frame = 0
+                    green_ninja.anim_frame = 0
                     mode = 'idle'
                 if event.key == K_LEFT:
                     moving = 0
-                    anim_frame = 0
+                    green_ninja.anim_frame = 0
                     mode = 'idle'
         surf = pygame.transform.scale(display, win_size)
         screen.blit(surf, (dif_x, dif_y))
