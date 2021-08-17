@@ -30,12 +30,13 @@ class GameCharacter:
         elif ch_type == "skeleton_spear":
             self.sprite = pygame.image.load('source/...').convert()
         self.rect = pygame.Rect(coords[0], coords[1], self.sprite.get_width(), self.sprite.get_height())
-        self.speed = 10
+        self.speed = [1, 4]     # [walk speed, run speed]
 
     def set_speed(self, speed):
         self.speed = speed
 
-    # def move(self, direction):
+    def move(self, direction, mode=0):
+        self.rect.x += direction * self.speed[mode]
 
 
 class Armour:
@@ -95,20 +96,32 @@ def main_menu():
     chain_down_image = pygame.image.load('source/menu/chaindown.png')
     chain_down = pygame.Rect(333, 137, chain_down_image.get_width(), chain_down_image.get_height())
     images = [button_start_image, button_load_image, button_settings_image, button_exit_image, chain_image,
-              chain_down_image, purple_ninja.sprite, green_ninja.sprite]
-    objects = [button_start, button_load, button_settings, button_exit, chain, chain_down, purple_ninja, green_ninja]
-    for image, obj in zip(images, objects):
-        display.blit(image, obj)
-    pygame.display.update()
-    clock.tick(60)
+              chain_down_image]
+    objects = [button_start, button_load, button_settings, button_exit, chain, chain_down]
+    moving = 0
     running = True
     while running:
+        display.blit(background, (0, 0))
+        for image, obj in zip(images, objects):
+            display.blit(image, obj)
+        display.blit(purple_ninja.sprite, purple_ninja.rect)
+        display.blit(green_ninja.sprite, green_ninja.rect)
+        green_ninja.move(moving)
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
+                if event.key == K_RIGHT:
+                    moving = 1
+                if event.key == K_LEFT:
+                    moving = -1
+            if event.type == KEYUP:
+                if event.key == K_RIGHT:
+                    moving = 0
+                if event.key == K_LEFT:
+                    moving = 0
         surf = pygame.transform.scale(display, win_size)
         screen.blit(surf, (dif_x, dif_y))
         pygame.display.update()
