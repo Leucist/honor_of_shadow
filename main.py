@@ -7,6 +7,7 @@ from pygame.locals import *
 pygame.init()
 
 pygame.display.set_caption('Тень Чести')
+pygame.mixer.pre_init(44100, -16, 2, 512)
 
 clock = pygame.time.Clock()
 # info = pygame.display.Info()
@@ -72,6 +73,8 @@ def start():
 
 
 def main_menu():
+    with open("settings.json", "r", encoding="UTF-8") as settings_file:
+        settings = json.loads(settings_file.read())
     info = pygame.display.Info()
     screen_width, screen_height = info.current_w, info.current_h
     width = int(((screen_width + screen_height) / 2 + abs(screen_width - screen_height) / 2))
@@ -119,6 +122,11 @@ def main_menu():
     purple_ninja.anim_frame = 0
     mode = 'idle'
     running = True
+
+    pygame.mixer.music.load("source/audio/menu_backgound_music.wav")
+    pygame.mixer.music.set_volume(settings['volume']['background_music'])
+    pygame.mixer.music.play(-1)
+
     while running:
         display.blit(background, (0, 0))
 
