@@ -21,7 +21,9 @@ class GameCharacter:
     def __init__(self, coords, ch_type):
         self.animation_database = {}
         self.animation_frames = {}
+        self.mode = 'idle'
         self.anim_frame = 0
+        self.moving = 0
         self.name = ch_type
         self.sprite = pygame.image.load('source/animations/' + self.name + '/idle/idle_0.png').convert_alpha()
         with open("character_settings.json", "r", encoding="UTF-8") as settings_file:
@@ -35,8 +37,8 @@ class GameCharacter:
                 self.load_animation(mode, animset[mode])
         self.rect = pygame.Rect(coords[0], coords[1], self.sprite.get_width(), self.sprite.get_height())
 
-    def move(self, direction, mode=0):
-        self.rect.x += direction * self.speed[mode]
+    def move(self, direction):
+        self.rect.x += direction * self.speed[self.mode]
 
     def load_animation(self, mode, frame_durations):
         animation_frame_data = []
@@ -52,17 +54,10 @@ class GameCharacter:
             n += 1
         self.animation_database[mode] = animation_frame_data
 
-    def change_frame(self, mode):
-        if self.anim_frame >= len(self.animation_database[mode]):
+    def change_frame(self):
+        if self.anim_frame >= len(self.animation_database[self.mode]):
             self.anim_frame = 0
-        self.sprite = self.animation_frames[self.animation_database[mode][self.anim_frame]]
-
-
-def change_mode(mode, new_mode):
-    if mode != new_mode:
-        global anim_frame
-        anim_frame = 0
-    return mode
+        self.sprite = self.animation_frames[self.animation_database[self.mode][self.anim_frame]]
 
 
 def start():
@@ -89,8 +84,8 @@ def main_menu():
     dif_x = int((screen_width - width) / 2)
     dif_y = int((screen_height - height) / 2)
 
-    background = pygame.image.load('source/menu/background.jpg')
-    light_background = pygame.image.load('source/menu/light_background.jpg')
+    background = pygame.image.load('source/menu/background.jpg').convert()
+    light_background = pygame.image.load('source/menu/light_background.jpg').convert()
     display.blit(background, (0, 0))
     positions = [
         (103, 321),
@@ -117,10 +112,10 @@ def main_menu():
     images = [button_start_image, button_load_image, button_settings_image, button_exit_image, chain_image,
               chain_down_image]
     objects = [button_start, button_load, button_settings, button_exit, chain, chain_down]
-    moving = 0
+    characters = [purple_ninja, green_ninja]
+    LIGHT_DISTANCE = [100, 90] * 15
     green_ninja.anim_frame = 0
     purple_ninja.anim_frame = 0
-    mode = 'idle'
     running = True
 
     pygame.mixer.music.load("source/audio/menu_backgound_music.wav")
@@ -134,28 +129,24 @@ def main_menu():
         # Probably gonna remake it in order it will be easier to treat torches as single objects
         purple_torch = [purple_ninja.rect.x + 3, purple_ninja.rect.y + 12]
         green_torch = [green_ninja.rect.x + 3, green_ninja.rect.y + 12]
-        LIGHT_DISTANCE = 100
-        for i in range(LIGHT_DISTANCE):
-            light.append(pygame.Rect(purple_torch[0] - LIGHT_DISTANCE / 2 - i, purple_torch[1] - LIGHT_DISTANCE / 2 + i,
-                                     LIGHT_DISTANCE + i, 1))
-            light.append(pygame.Rect(green_torch[0] - LIGHT_DISTANCE / 2 - i, green_torch[1] - LIGHT_DISTANCE / 2 + i,
-                                     LIGHT_DISTANCE + i, 1))
+        for i in range(LIGHT_DISTANCE[purple_ninja.anim_frame]):
+            light.append(pygame.Rect(purple_torch[0] - LIGHT_DISTANCE[purple_ninja.anim_frame] / 2 - i,
+                                     purple_torch[1] - LIGHT_DISTANCE[purple_ninja.anim_frame] / 2 + i,
+                                     LIGHT_DISTANCE[purple_ninja.anim_frame] + i, 1))
+            light.append(pygame.Rect(green_torch[0] - LIGHT_DISTANCE[green_ninja.anim_frame] / 2 - i,
+                                     green_torch[1] - LIGHT_DISTANCE[green_ninja.anim_frame] / 2 + i,
+                                     LIGHT_DISTANCE[green_ninja.anim_frame] + i, 1))
         for rect in light:
             display.blit(light_background, rect, rect)
 
         for image, obj in zip(images, objects):
             display.blit(image, obj)
-        if moving != 0:
-            # change_mode(mode, 'walk')
-            # green_ninja.change_frame('walk')
-            green_ninja.move(moving)
-        green_ninja.change_frame(mode)
-        purple_ninja.change_frame('idle')
-        green_ninja.anim_frame += 1
-        purple_ninja.anim_frame += 1
-
-        display.blit(purple_ninja.sprite, purple_ninja.rect)
-        display.blit(green_ninja.sprite, green_ninja.rect)
+        for character in characters:
+            if character.moving != 0:
+                character.move(character.moving)
+            character.change_frame()
+            character.anim_frame += 1
+            display.blit(character.sprite, character.rect)
 
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -164,20 +155,20 @@ def main_menu():
                 if event.key == pygame.K_ESCAPE:
                     running = False
                 if event.key == K_RIGHT:
-                    moving = 1
+                    green_ninja.moving = 1
                     green_ninja.anim_frame = 0
                     mode = 'walk'
                 if event.key == K_LEFT:
-                    moving = -1
+                    green_ninja.moving = -1
                     green_ninja.anim_frame = 0
                     mode = 'walk'
             if event.type == KEYUP:
                 if event.key == K_RIGHT:
-                    moving = 0
+                    green_ninja.moving = 0
                     green_ninja.anim_frame = 0
                     mode = 'idle'
                 if event.key == K_LEFT:
-                    moving = 0
+                    green_ninja.moving = 0
                     green_ninja.anim_frame = 0
                     mode = 'idle'
         surf = pygame.transform.scale(display, win_size)
