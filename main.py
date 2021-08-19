@@ -24,6 +24,7 @@ class GameCharacter:
         self.mode = 'idle'
         self.anim_frame = 0
         self.moving = 0
+        self.flip = False
         self.name = ch_type
         self.sprite = pygame.image.load('source/animations/' + self.name + '/idle/idle_0.png').convert_alpha()
         with open("character_settings.json", "r", encoding="UTF-8") as settings_file:
@@ -113,7 +114,6 @@ def main_menu():
               chain_down_image]
     objects = [button_start, button_load, button_settings, button_exit, chain, chain_down]
     characters = [purple_ninja, green_ninja]
-    LIGHT_DISTANCE = [100, 90] * 15
     green_ninja.anim_frame = 0
     purple_ninja.anim_frame = 0
     running = True
@@ -129,13 +129,28 @@ def main_menu():
         # Probably gonna remake it in order it will be easier to treat torches as single objects
         purple_torch = [purple_ninja.rect.x + 3, purple_ninja.rect.y + 12]
         green_torch = [green_ninja.rect.x + 3, green_ninja.rect.y + 12]
-        for i in range(LIGHT_DISTANCE[purple_ninja.anim_frame]):
-            light.append(pygame.Rect(purple_torch[0] - LIGHT_DISTANCE[purple_ninja.anim_frame] / 2 - i,
-                                     purple_torch[1] - LIGHT_DISTANCE[purple_ninja.anim_frame] / 2 + i,
-                                     LIGHT_DISTANCE[purple_ninja.anim_frame] + i, 1))
-            light.append(pygame.Rect(green_torch[0] - LIGHT_DISTANCE[green_ninja.anim_frame] / 2 - i,
-                                     green_torch[1] - LIGHT_DISTANCE[green_ninja.anim_frame] / 2 + i,
-                                     LIGHT_DISTANCE[green_ninja.anim_frame] + i, 1))
+        # LIGHT_DISTANCE = [100, 90] * 15
+        # for i in range(LIGHT_DISTANCE[purple_ninja.anim_frame]):
+        #     light.append(pygame.Rect(purple_torch[0] - LIGHT_DISTANCE[purple_ninja.anim_frame] / 2 - i,
+        #                              purple_torch[1] - LIGHT_DISTANCE[purple_ninja.anim_frame] / 2 + i,
+        #                              LIGHT_DISTANCE[purple_ninja.anim_frame] + i, 1))
+        #     light.append(pygame.Rect(green_torch[0] - LIGHT_DISTANCE[green_ninja.anim_frame] / 2 - i,
+        #                              green_torch[1] - LIGHT_DISTANCE[green_ninja.anim_frame] / 2 + i,
+        #                              LIGHT_DISTANCE[green_ninja.anim_frame] + i, 1))
+        LIGHT_DISTANCE = 50
+        # for i in range(LIGHT_DISTANCE):
+        #     light.append(pygame.Rect(purple_torch[0] - LIGHT_DISTANCE / 2 - i, purple_torch[1] - LIGHT_DISTANCE / 2 + i,
+        #                              LIGHT_DISTANCE + i, 1))
+        #     light.append(pygame.Rect(green_torch[0] - LIGHT_DISTANCE / 2 - i, green_torch[1] - LIGHT_DISTANCE / 2 + i,
+        #                              LIGHT_DISTANCE + i, 1))
+        for i in range(-LIGHT_DISTANCE, LIGHT_DISTANCE + 1):
+            # x_ch = (LIGHT_DISTANCE + i)**2  # [0, 2LD]
+            x_ch = ((LIGHT_DISTANCE - i) * (LIGHT_DISTANCE + i)) ** 0.5
+            w_ch = x_ch * 2
+            light.append(pygame.Rect(purple_torch[0] - x_ch, purple_torch[1] + i,
+                                     w_ch, 1))
+            light.append(pygame.Rect(green_torch[0] - x_ch, green_torch[1] + i,
+                                     w_ch, 1))
         for rect in light:
             display.blit(light_background, rect, rect)
 
@@ -146,7 +161,7 @@ def main_menu():
                 character.move(character.moving)
             character.change_frame()
             character.anim_frame += 1
-            display.blit(character.sprite, character.rect)
+            display.blit(pygame.transform.flip(character.sprite, character.flip, False), character.rect)
 
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -155,22 +170,24 @@ def main_menu():
                 if event.key == pygame.K_ESCAPE:
                     running = False
                 if event.key == K_RIGHT:
+                    green_ninja.flip = False
                     green_ninja.moving = 1
                     green_ninja.anim_frame = 0
-                    mode = 'walk'
+                    green_ninja.mode = 'walk'
                 if event.key == K_LEFT:
+                    green_ninja.flip = True
                     green_ninja.moving = -1
                     green_ninja.anim_frame = 0
-                    mode = 'walk'
+                    green_ninja.mode = 'walk'
             if event.type == KEYUP:
                 if event.key == K_RIGHT:
                     green_ninja.moving = 0
                     green_ninja.anim_frame = 0
-                    mode = 'idle'
+                    green_ninja.mode = 'idle'
                 if event.key == K_LEFT:
                     green_ninja.moving = 0
                     green_ninja.anim_frame = 0
-                    mode = 'idle'
+                    green_ninja.mode = 'idle'
         surf = pygame.transform.scale(display, win_size)
         screen.blit(surf, (dif_x, dif_y))
         pygame.display.update()
