@@ -114,6 +114,7 @@ def main_menu():
               chain_down_image]
     objects = [button_start, button_load, button_settings, button_exit, chain, chain_down]
     characters = [purple_ninja, green_ninja]
+    LIGHT_DISTANCE = [50, 50,50, 51,51, 51, 49, 49, 49] * 4
     green_ninja.anim_frame = 0
     purple_ninja.anim_frame = 0
     running = True
@@ -129,23 +130,10 @@ def main_menu():
         # Probably gonna remake it in order it will be easier to treat torches as single objects
         purple_torch = [purple_ninja.rect.x + 3 + 40 * purple_ninja.flip, purple_ninja.rect.y + 12]
         green_torch = [green_ninja.rect.x + 3 + 40 * green_ninja.flip, green_ninja.rect.y + 12]
-        # LIGHT_DISTANCE = [100, 90] * 15
-        # for i in range(LIGHT_DISTANCE[purple_ninja.anim_frame]):
-        #     light.append(pygame.Rect(purple_torch[0] - LIGHT_DISTANCE[purple_ninja.anim_frame] / 2 - i,
-        #                              purple_torch[1] - LIGHT_DISTANCE[purple_ninja.anim_frame] / 2 + i,
-        #                              LIGHT_DISTANCE[purple_ninja.anim_frame] + i, 1))
-        #     light.append(pygame.Rect(green_torch[0] - LIGHT_DISTANCE[green_ninja.anim_frame] / 2 - i,
-        #                              green_torch[1] - LIGHT_DISTANCE[green_ninja.anim_frame] / 2 + i,
-        #                              LIGHT_DISTANCE[green_ninja.anim_frame] + i, 1))
-        LIGHT_DISTANCE = 50
-        # for i in range(LIGHT_DISTANCE):
-        #     light.append(pygame.Rect(purple_torch[0] - LIGHT_DISTANCE / 2 - i, purple_torch[1] - LIGHT_DISTANCE / 2 + i,
-        #                              LIGHT_DISTANCE + i, 1))
-        #     light.append(pygame.Rect(green_torch[0] - LIGHT_DISTANCE / 2 - i, green_torch[1] - LIGHT_DISTANCE / 2 + i,
-        #                              LIGHT_DISTANCE + i, 1))
-        for i in range(-LIGHT_DISTANCE, LIGHT_DISTANCE + 1):
+        for i in range(-LIGHT_DISTANCE[purple_ninja.anim_frame], LIGHT_DISTANCE[purple_ninja.anim_frame] + 1):
             # x_ch = (LIGHT_DISTANCE + i)**2  # [0, 2LD]
-            x_ch = ((LIGHT_DISTANCE - i) * (LIGHT_DISTANCE + i)) ** 0.5
+            x_ch = ((LIGHT_DISTANCE[purple_ninja.anim_frame] - i) * (
+                        LIGHT_DISTANCE[purple_ninja.anim_frame] + i)) ** 0.5
             w_ch = x_ch * 2
             light.append(pygame.Rect(purple_torch[0] - x_ch, purple_torch[1] + i,
                                      w_ch, 1))
