@@ -127,8 +127,8 @@ def main_menu():
 
         light = []
         # Probably gonna remake it in order it will be easier to treat torches as single objects
-        purple_torch = [purple_ninja.rect.x + 3, purple_ninja.rect.y + 12]
-        green_torch = [green_ninja.rect.x + 3, green_ninja.rect.y + 12]
+        purple_torch = [purple_ninja.rect.x + 3 + 40 * purple_ninja.flip, purple_ninja.rect.y + 12]
+        green_torch = [green_ninja.rect.x + 3 + 40 * green_ninja.flip, green_ninja.rect.y + 12]
         # LIGHT_DISTANCE = [100, 90] * 15
         # for i in range(LIGHT_DISTANCE[purple_ninja.anim_frame]):
         #     light.append(pygame.Rect(purple_torch[0] - LIGHT_DISTANCE[purple_ninja.anim_frame] / 2 - i,
@@ -151,6 +151,7 @@ def main_menu():
                                      w_ch, 1))
             light.append(pygame.Rect(green_torch[0] - x_ch, green_torch[1] + i,
                                      w_ch, 1))
+            # FOR OPTIMISATION SHOULD USE INCREASING THE HEIGHT OF THE RECT AND ADDING "i += n"
         for rect in light:
             display.blit(light_background, rect, rect)
 
