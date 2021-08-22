@@ -15,7 +15,9 @@ clock = pygame.time.Clock()
 # window_width, window_height = screen_width - 10, screen_height - 50
 # window = pygame.display.set_mode((window_width,window_height))
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-global display_width
+global display_width, GRAVITY
+
+stairs_up, stairs_down = [], []
 
 
 class GameCharacter:
@@ -29,6 +31,7 @@ class GameCharacter:
         self.flip = False
         self.name = ch_type
         self.sprite = pygame.image.load('source/animations/' + self.name + '/idle/idle_0.png').convert_alpha()
+        self.rect = pygame.Rect(coords[0], coords[1], self.sprite.get_width(), self.sprite.get_height())
         with open("character_settings.json", "r", encoding="UTF-8") as settings_file:
             data = json.loads(settings_file.read())
             self.hp = data[self.name][0]
@@ -39,11 +42,35 @@ class GameCharacter:
             animset = data[self.name][4]
             for mode in animset:
                 self.load_animation(mode, animset[mode])
-        self.rect = pygame.Rect(coords[0], coords[1], self.sprite.get_width(), self.sprite.get_height())
+            self.hitbox = pygame.Rect(
+                self.rect.x + data[self.name][5][0], self.rect.y + data[self.name][5][1], data[self.name][5][2],
+                data[self.name][5][3])
 
     def move(self, collidable_objects):
+        self.check_collision(collidable_objects)
+        for obj in self.hit_list:
+            if obj in stairs_up:
+                # if not self.hitbox.colliderect(obj):
+                    # должен продолжить движение
+                k = obj.height / obj.width
+                self.rect.y -= self.moving[0] * self.speed[self.mode] / 2 * k
+                self.rect.x += self.moving[0] * self.speed[self.mode] / 2
+            elif obj in stairs_down:
+                k = obj.height / obj.width
+                self.rect.y += self.moving[0] * self.speed[self.mode] / 2 * k
+                self.rect.x += self.moving[0] * self.speed[self.mode] / 2
+            else:
+                self.rect.x += self.moving[0] * self.speed[self.mode]
+                self.check_collision(collidable_objects)
+                if self.moving[0] > 0:
+                    self.rect.right = obj.left
+                    self.mode = 'idle'
+                elif self.moving[0] < 0:
+                    self.rect.left = obj.right
+                    self.mode = 'idle'
         self.rect.x += self.moving[0] * self.speed[self.mode]
         self.check_collision(collidable_objects)
+        # interacting with the borders ---
         if self.rect.x <= 0:
             self.rect.x = 0
             self.mode = 'idle'
@@ -51,24 +78,21 @@ class GameCharacter:
         if self.rect.x >= right_border:
             self.rect.x = right_border
             self.mode = 'idle'
-        for obj in self.hit_list:
-            if self.moving[0] > 0:
-                self.rect.right = obj.left
-                self.mode = 'idle'
-            elif self.moving[0] < 0:
-                self.rect.left = obj.right
-                self.mode = 'idle'
-        self.rect.y += self.moving[1] * self.speed[self.mode]
-        self.check_collision(collidable_objects)
-        for obj in self.hit_list:
-            if self.moving[1] > 0:
-                self.rect.bottom = obj.top
-                self.mode = 'idle'
-            elif self.moving[1] < 0:
-                self.rect.top = obj.bottom
-                self.mode = 'idle'
-            # self.speed[1] = 0
+        # --------------------------------
 
+        self.rect.y += self.moving[1] * GRAVITY
+        self.check_collision(collidable_objects)
+        if self.hit_list is None:
+            self.moving[1] = -1
+        for obj in self.hit_list:
+            # if obj not in (stairs_down or stairs_up):
+            if self.moving[1] < 0:
+                self.rect.bottom = obj.top
+                self.moving[1] = 0
+            elif self.moving[1] > 0:
+                self.rect.top = obj.bottom
+                self.moving[1] = 0
+            # self.speed[1] = 0
 
     def load_animation(self, mode, frame_durations):
         animation_frame_data = []
@@ -106,7 +130,7 @@ def start():
 
 
 def main_menu():
-    global display_width
+    global display_width, GRAVITY
     display_width = 600
     with open("settings.json", "r", encoding="UTF-8") as settings_file:
         settings = json.loads(settings_file.read())
@@ -149,14 +173,21 @@ def main_menu():
     chain = pygame.Rect(343, 136, chain_image.get_width(), chain_image.get_height())
     chain_down_image = pygame.image.load('source/menu/chaindown.png').convert_alpha()
     chain_down = pygame.Rect(333, 137, chain_down_image.get_width(), chain_down_image.get_height())
+    stairs1 = pygame.Rect(220, 337, 44, 42)
+    stairs2 = pygame.Rect(338, 337, 47, 42)
+    floor = pygame.Rect(0, 379, 600, 1)
     images = [button_start_image, button_load_image, button_settings_image, button_exit_image, chain_image,
               chain_down_image]
     game_objects = [button_start, button_load, button_settings, button_exit, chain, chain_down]
-    collidable_objects = [button_start, button_load, button_settings, button_exit]
-    collidable_objects.append(pygame.Rect(0, 379, 600, 1))      # floor
-    collidable_objects.append(pygame.Rect(220, 337, 165, 43))   # stairs
+    collidable_objects = [button_start, button_load, button_settings, button_exit, stairs1, stairs2, floor]
+    # collidable_objects.append(pygame.Rect(0, 379, 600, 1))      # floor
+    # collidable_objects.append(pygame.Rect(220, 337, 165, 43))   # stairs
+    GRAVITY = 4
+    stairs_up.append(stairs1)
+    stairs_down.append(stairs2)
     characters = [purple_ninja, green_ninja]
-    LIGHT_DISTANCE = [50, 50, 50, 51, 51, 51, 49, 49, 49] * 4
+    # LIGHT_DISTANCE = [50, 50, 50, 51, 51, 51, 49, 49, 49] * 4
+    LIGHT_DISTANCE = [70, 70, 70, 71, 71, 71, 73, 73, 71] * 4
     green_ninja.anim_frame = 0
     purple_ninja.anim_frame = 0
     running = True
@@ -188,7 +219,7 @@ def main_menu():
             display.blit(image, obj)
 
         for character in characters:
-            if character.moving[0] != 0:
+            if character.moving[0] != 0 or character.moving[1] != 0:
                 character.move(collidable_objects)
             character.change_frame()
             character.anim_frame += 1
