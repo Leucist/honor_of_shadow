@@ -66,13 +66,26 @@ class GameCharacter:
         for obj in self.hit_list:
             if obj in stairs_up:
                 k = obj.height / obj.width
+                print("---------IT COLLIDES WITH THE STAIRS-------")
+                print(self.hitbox)
+                print(self.mode)
                 print(self.moving)
+                print("self speed: " + str(self.speed[self.mode]))
+                print("k: " + str(k))
                 self.rect.y -= self.moving[0] * self.speed[self.mode] * k
                 self.hitbox.y -= self.moving[0] * self.speed[self.mode] * k
+                print(self.hitbox)
             elif obj in stairs_down:
+                print("\033[34mStairs down")
                 k = obj.height / obj.width
+                print(self.hitbox)
                 self.rect.y += self.moving[0] * self.speed[self.mode] * k
+                print("RECT: ")
+                print(self.rect)
+                print(self.hitbox)
                 self.hitbox.y += self.moving[0] * self.speed[self.mode] * k
+                print(self.hitbox)
+                print("\033[0m")
             else:
                 if self.moving[0] > 0:
                     self.rect.left = obj.left - self.hitbox.width - self.x_diff
@@ -83,16 +96,25 @@ class GameCharacter:
                     self.hitbox.left = obj.right
                     self.mode = 'idle'
         self.rect.y += self.moving[1] * GRAVITY
+        self.hitbox.y += self.moving[1] * GRAVITY
         self.check_collision(collidable_objects)
-        if self.hit_list is None:
+        if self.hit_list == []:
+            print("Ninja collides the pure air only ~ ~ ~")
             self.moving[1] = 1
         for obj in self.hit_list:
+            print("\033[31m")
+            print(obj)
+            print(self.hitbox.right)
+            print(self.hitbox.bottom)
+            print("\033[0m")
             # if obj not in (stairs_down or stairs_up):
             if self.moving[1] < 0:
                 self.rect.top = obj.bottom
+                self.hitbox.top = obj.bottom + self.y_diff
                 self.moving[1] = 0
             elif self.moving[1] > 0:
                 self.rect.bottom = obj.top
+                self.hitbox.bottom = obj.top
                 self.moving[1] = 0
             # self.speed[1] = 0
 
@@ -234,6 +256,10 @@ def main_menu():
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
+                    print("\033[35m")
+                    print(green_ninja.rect)
+                    print(green_ninja.hitbox)
+                    print("\033[0m")
                     running = False
                 if event.key == K_RIGHT:
                     green_ninja.flip = False
