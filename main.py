@@ -42,55 +42,57 @@ class GameCharacter:
             animset = data[self.name][4]
             for mode in animset:
                 self.load_animation(mode, animset[mode])
+            self.x_diff = data[self.name][5][0]
+            self.y_diff = data[self.name][5][1]
             self.hitbox = pygame.Rect(
-                self.rect.x + data[self.name][5][0], self.rect.y + data[self.name][5][1], data[self.name][5][2],
+                self.rect.x + self.x_diff, self.rect.y + self.y_diff, data[self.name][5][2],
                 data[self.name][5][3])
 
     def move(self, collidable_objects):
-        self.check_collision(collidable_objects)
-        for obj in self.hit_list:
-            if obj in stairs_up:
-                # if not self.hitbox.colliderect(obj):
-                    # должен продолжить движение
-                k = obj.height / obj.width
-                self.rect.y -= self.moving[0] * self.speed[self.mode] / 2 * k
-                self.rect.x += self.moving[0] * self.speed[self.mode] / 2
-            elif obj in stairs_down:
-                k = obj.height / obj.width
-                self.rect.y += self.moving[0] * self.speed[self.mode] / 2 * k
-                self.rect.x += self.moving[0] * self.speed[self.mode] / 2
-            else:
-                self.rect.x += self.moving[0] * self.speed[self.mode]
-                self.check_collision(collidable_objects)
-                if self.moving[0] > 0:
-                    self.rect.right = obj.left
-                    self.mode = 'idle'
-                elif self.moving[0] < 0:
-                    self.rect.left = obj.right
-                    self.mode = 'idle'
         self.rect.x += self.moving[0] * self.speed[self.mode]
+        self.hitbox.x += self.moving[0] * self.speed[self.mode]
         self.check_collision(collidable_objects)
         # interacting with the borders ---
         if self.rect.x <= 0:
             self.rect.x = 0
+            self.hitbox.x = self.x_diff
             self.mode = 'idle'
         right_border = display_width - self.sprite.get_width()
         if self.rect.x >= right_border:
             self.rect.x = right_border
+            self.hitbox.x = right_border + self.x_diff
             self.mode = 'idle'
         # --------------------------------
-
+        for obj in self.hit_list:
+            if obj in stairs_up:
+                k = obj.height / obj.width
+                print(self.moving)
+                self.rect.y -= self.moving[0] * self.speed[self.mode] * k
+                self.hitbox.y -= self.moving[0] * self.speed[self.mode] * k
+            elif obj in stairs_down:
+                k = obj.height / obj.width
+                self.rect.y += self.moving[0] * self.speed[self.mode] * k
+                self.hitbox.y += self.moving[0] * self.speed[self.mode] * k
+            else:
+                if self.moving[0] > 0:
+                    self.rect.left = obj.left - self.hitbox.width - self.x_diff
+                    self.hitbox.right = obj.left
+                    self.mode = 'idle'
+                elif self.moving[0] < 0:
+                    self.rect.left = obj.right - self.x_diff
+                    self.hitbox.left = obj.right
+                    self.mode = 'idle'
         self.rect.y += self.moving[1] * GRAVITY
         self.check_collision(collidable_objects)
         if self.hit_list is None:
-            self.moving[1] = -1
+            self.moving[1] = 1
         for obj in self.hit_list:
             # if obj not in (stairs_down or stairs_up):
             if self.moving[1] < 0:
-                self.rect.bottom = obj.top
+                self.rect.top = obj.bottom
                 self.moving[1] = 0
             elif self.moving[1] > 0:
-                self.rect.top = obj.bottom
+                self.rect.bottom = obj.top
                 self.moving[1] = 0
             # self.speed[1] = 0
 
@@ -118,7 +120,7 @@ class GameCharacter:
         for obj in collidable_objects:
             # if obj == self.rect:
             #     continue
-            if self.rect.colliderect(obj):
+            if self.hitbox.colliderect(obj):
                 self.hit_list.append(obj)
 
 
@@ -157,6 +159,8 @@ def main_menu():
         (486, 321),
     ]
     pos = randint(0, 2)
+    if settings['start'] == 0:
+        pos = 1
     purple_ninja = GameCharacter(positions[pos], "purple_ninja")
     green_ninja = GameCharacter(positions[pos - 1], "green_ninja")
     del pos, screen_width, screen_height
